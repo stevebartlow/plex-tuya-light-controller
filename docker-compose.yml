@@ -1,0 +1,18 @@
+services:
+  plex-lights:
+    build: .
+    container_name: plex_lights
+    restart: unless-stopped
+    # Port mapping (Host network can be cleaner for IoT but requires Linux host usually)
+    # network_mode: host
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_APP=server.py
+      # Environment variables can be overridden here or read from config.py
+      # - PLEX_TOKEN=...
+    volumes:
+      # Mount config.py so you can edit it on host without rebuilding
+      - ./config.py:/app/config.py
+      # Mount devices.json if you have one
+      - ./devices.json:/app/devices.json
