@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Device keys and local secrets: never commit
+devices.json
+snapshot.json
+tinytuya.json
+tuya-raw.json

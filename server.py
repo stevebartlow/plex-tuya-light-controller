@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 import json
 import logging
@@ -33,12 +34,19 @@ def webhook():
     player = data.get('Player', {})
 
     player_name = player.get('title', '')
+    player_uuid = player.get('uuid', '')
     logger.info(f"Player name: {player_name}")
+    logger.info(f"Player UUID: {player_uuid}")
 
-    # Filter by Player Name if configured
-    from config import TARGET_PLAYER_NAME
-    if TARGET_PLAYER_NAME:
-        player_name = player.get('title', '')
+    # Filter by Player Name or UUID if configured
+    from config import TARGET_PLAYER_NAME, TARGET_PLAYER_UUID
+    
+    # If UUID is set, it takes precedence as it's more specific
+    if TARGET_PLAYER_UUID:
+        if TARGET_PLAYER_UUID != player_uuid:
+            logger.info(f"Ignoring event from player UUID '{player_uuid}' (Target UUID: '{TARGET_PLAYER_UUID}')")
+            return jsonify({'status': 'ignored', 'reason': 'player_uuid_mismatch'}), 200
+    elif TARGET_PLAYER_NAME:
         # Check if the player name contains the target (case-insensitive)
         if TARGET_PLAYER_NAME.lower() not in player_name.lower():
             logger.info(f"Ignoring event from player '{player_name}' (Target: '{TARGET_PLAYER_NAME}')")
@@ -76,11 +84,12 @@ def webhook():
             logger.info("No thumb image found in metadata")
 
     elif event in ['media.stop', 'media.pause']:
-        logger.info("Media stopped/paused. Resetting lights.")
-        light_controller.set_white()
+        logger.info("Media stopped/paused. Restoring light state.")
+        light_controller.restore_state()
 
     return jsonify({'status': 'success'}), 200
 
 if __name__ == '__main__':
     # Run on 0.0.0.0 to be accessible on local network
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # The Werkzeug debugger allows remote code execution; never enable it on 0.0.0.0 by default.
+    app.run(host='0.0.0.0', port=5001, debug=os.getenv('FLASK_DEBUG', '0') == '1')
