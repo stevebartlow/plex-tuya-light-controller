@@ -1,0 +1,4 @@
+flask
+tinytuya
+colorthief
+requests

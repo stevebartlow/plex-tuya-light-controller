@@ -45,6 +45,11 @@ Edit `config.py` with your settings:
 *   `PLEX_TOKEN`: Your X-Plex-Token (Find this in Plex Web -> Media Info -> View XML).
 *   `PLEX_URL`: URL of your Plex server (e.g., `http://192.168.1.10:32400` or `http://plex:32400` if in same docker network).
 *   `TARGET_PLAYER_NAME`: (Optional) The name of the Plex client to react to (e.g. `Roku Ultra`). Leave empty to react to all.
+*   `TARGET_PLAYER_UUID`: (Optional) The player's UUID, more precise than the name and takes precedence when set. Each webhook event logs `Player UUID: ...`.
+
+All of these can also be set as environment variables (`PLEX_TOKEN`, `PLEX_URL`, `TARGET_PLAYER_NAME`, `TARGET_PLAYER_UUID`), so no secrets need to live in `config.py`. Set `FLASK_DEBUG=1` only for local debugging.
+
+When playback stops or pauses, the lights are restored to their previous state.
 
 ### 3. Run with Docker
 ```bash
